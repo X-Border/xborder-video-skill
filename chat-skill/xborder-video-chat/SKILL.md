@@ -12,7 +12,7 @@ description: 在 X-Border chat 里生成高转化抖音/TikTok 带货短视频�
 ## 可用工具(MCP)
 - **`analyzeProductImage`** — 在写产品保真契约前识别产品图。只把成功返回的分析和用户明确提供的事实作为商品证据。
 - **`generateImage`** — 出分镜图。传 `referenceImageUrl`(公网产品图 URL)+ `prompt`(英文分镜提示词)+ `scale`(取【本次运行参数】比例;支持 `1:1/16:9/9:16`,默认档 `9:16`)+ `model:"seedream-4.5"`。返回图片 URL。**它是编辑型:产品图作参考,保住产品外观。**
-- **`generateSeedanceVideo`** — 出视频。传 `prompt`(最终视频提示词)+ `referenceImages:[产品图URL, 分镜图URL…]`(≤9)+ `aspectRatio`(取【本次运行参数】比例,默认档 `9:16`)+ `duration`(3–15 秒)+ `generateAudio`。异步:成功返回视频 URL,超时返回 `taskToken`。更长视频拆段生成,禁止传 `-1`。
+- **`generateSeedanceVideo`** — 出视频。传 `prompt`(最终视频提示词)+ `referenceImages:[产品图URL, 分镜图URL…]`(≤9)+ `aspectRatio`(取【本次运行参数】比例,默认档 `9:16`)+ `duration`(4–15 秒)+ `generateAudio`。异步:成功返回视频 URL,超时返回 `taskToken`。更长视频拆段生成,禁止传 `-1`。
 - **`getSeedanceVideoResult`** — 用 `taskToken` 查视频结果。
 - **`generateKlingVideo`** — 出视频(Kling v3.0 Pro,1080p)。传 `prompt`(最终视频提示词)+ `imageUrl`(**单张**起始图 URL:最强 Hook 帧或产品图)+ `duration`(3–15)+ `generateAudio`。**只收单张图,不吃九宫格多帧。** 异步:成功返回视频 URL,超时返回 `taskToken`。
 - **`getKlingVideoResult`** — 用 `taskToken` 查 Kling 视频结果。
@@ -80,7 +80,7 @@ description: 在 X-Border chat 里生成高转化抖音/TikTok 带货短视频�
 - 生成中:说明已提交,用 `getSeedanceVideoResult(taskToken)` 查;没好就把 taskToken 给用户稍后再查。
 - 失败:如实说 `errorMsg`,不编造链接。
 - 第一阶段脚本没确认前,不出图、不出片。
-- 同一阶段最多一次定点图片重试;视频任务一旦返回 taskToken,只轮询该任务,禁止重新提交造成重复扣费。
+- 同一阶段最多一次定点图片重试;视频任务一旦返回 taskToken,只轮询该任务,禁止重新提交造成重复扣费。视频创建阶段若因参数、校验或供应商错误失败,必须原样说明并停止;不得擅自改时长、模型或其他参数再次调用生成工具,更不得把第二次生成称为“重试同一个任务”。
 
 ## 什么时候读 references
 - **第 0 步定平台/genre 前 → `references/platform-profiles.md`**(平台语言/合规/比例/字幕/心智 + 运行参数块)。

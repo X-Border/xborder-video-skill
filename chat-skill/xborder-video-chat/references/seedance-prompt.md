@@ -50,7 +50,7 @@ generateSeedanceVideo({
   prompt: <上面的视频提示词>,
   referenceImages: [产品图URL, 分镜图URL, …],   // 产品图在前
   aspectRatio: <运行参数比例>,   // 9:16/1:1/16:9,取【本次运行参数】
-  duration: <运行参数单段时长>, // 3–15s；social-ad 9–15s / listing-demo 12–15s
+  duration: <运行参数单段时长>, // 4–15s；social-ad 9–15s / listing-demo 12–15s
   generateAudio: <audio_mode != silent>
 })
 ```
