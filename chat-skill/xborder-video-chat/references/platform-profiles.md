@@ -25,7 +25,7 @@ chat 版视频 skill 的**平台维度单一事实源**。SKILL 第 0 步据此�
 
 **时长 / audio_mode 默认**（用户/全局可覆盖）：
 - `social-ad`：9–15s（黄金，前 3 秒定生死）；audio 常 `ambient`/`music`。
-- `listing-demo`：15–30s（讲清产品即可）；audio 常 `ambient`/`voiceover`（功能讲解口播）。
+- `listing-demo`：单段 12–15s（讲清一个产品要点）；需要 15s 以上时拆成多个独立片段，分别验收后再剪辑；audio 常 `ambient`/`voiceover`（功能讲解口播）。
 
 **默认映射（底层是「货架 vs 内容电商」）**：
 - 货架电商（人找货：Temu/Noon/Amazon/Shein/Mercado/N11）→ 默认 `listing-demo`。

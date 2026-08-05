@@ -10,8 +10,9 @@ description: 在 X-Border chat 里生成高转化抖音/TikTok 带货短视频�
 裸调模型出的片很平、转化差。这个 skill 的价值就是把「强 Hook + 产品保真 + 先分镜图再出片」这套导演方法论套上去。
 
 ## 可用工具(MCP)
+- **`analyzeProductImage`** — 在写产品保真契约前识别产品图。只把成功返回的分析和用户明确提供的事实作为商品证据。
 - **`generateImage`** — 出分镜图。传 `referenceImageUrl`(公网产品图 URL)+ `prompt`(英文分镜提示词)+ `scale`(取【本次运行参数】比例;支持 `1:1/16:9/9:16`,默认档 `9:16`)+ `model:"seedream-4.5"`。返回图片 URL。**它是编辑型:产品图作参考,保住产品外观。**
-- **`generateSeedanceVideo`** — 出视频。传 `prompt`(最终视频提示词)+ `referenceImages:[产品图URL, 分镜图URL…]`(≤9)+ `aspectRatio`(取【本次运行参数】比例,默认档 `9:16`)+ `duration` + `generateAudio`。异步:成功返回视频 URL,超时返回 `taskToken`。
+- **`generateSeedanceVideo`** — 出视频。传 `prompt`(最终视频提示词)+ `referenceImages:[产品图URL, 分镜图URL…]`(≤9)+ `aspectRatio`(取【本次运行参数】比例,默认档 `9:16`)+ `duration`(3–15 秒)+ `generateAudio`。异步:成功返回视频 URL,超时返回 `taskToken`。更长视频拆段生成,禁止传 `-1`。
 - **`getSeedanceVideoResult`** — 用 `taskToken` 查视频结果。
 - **`generateKlingVideo`** — 出视频(Kling v3.0 Pro,1080p)。传 `prompt`(最终视频提示词)+ `imageUrl`(**单张**起始图 URL:最强 Hook 帧或产品图)+ `duration`(3–15)+ `generateAudio`。**只收单张图,不吃九宫格多帧。** 异步:成功返回视频 URL,超时返回 `taskToken`。
 - **`getKlingVideoResult`** — 用 `taskToken` 查 Kling 视频结果。
@@ -42,14 +43,14 @@ description: 在 X-Border chat 里生成高转化抖音/TikTok 带货短视频�
 
 > 详规见 references,关键步骤如下。**必须两阶段:先出中文脚本给用户确认,确认后才出图/出片。**
 
-1. **建产品保真契约(内部)** — 看产品图,列出品类/颜色/结构/材质/logo 位置大小方向。这是 P0 硬约束(详见 `references/product-fidelity.md`)。
+1. **建产品保真契约(内部)** — 先调用 `analyzeProductImage`;只根据成功分析和用户明确事实列出品类/颜色/结构/材质/logo 位置大小方向。这是 P0 硬约束(详见 `references/product-fidelity.md`)。识图失败时最多换一个可用 fallback 模型重试一次;仍失败就停止,请用户换图或只用其明确提供的事实,禁止根据 URL、文件名、模型记忆或相似商品猜测。
 2. **【第一阶段】写强 Hook 九宫格中文脚本** — 先判断用哪种 Hook(痛点夸张/结果前置/反常识/冲突对比/场景代入),前 3 格必须有停滑点。9 格:Hook(1-3)→ Solution(4-6)→ Trust&CTA(7-9)。先定统一视觉基调。用表格输出,**末尾问用户确认**。规则详见 `references/prompt-image.md`。
 3. **确认后【第二阶段】出分镜图** — 把每格中文脚本转成英文分镜 prompt(公式:景别+运镜+主体动作+场景+光影+全局色系+画幅词(按运行参数比例:`9:16→vertical`/`1:1→square`/`16:9→landscape`)+ 质感词 + `no timecode`;字幕按运行参数——禁字幕加 `no subtitles`,允许功能字幕则不加),用 `generateImage`(产品图 URL 作 `referenceImageUrl`,`scale`=运行参数比例)逐帧出图。**至少出前 3 格 Hook 帧 + 关键 Solution/CTA 帧;要精出全 9 帧。** 产品保真:产品图锁外观。
 4. **写 Seedance 视频提示词** — 按 `references/seedance-prompt.md`:9 格逐格写(时间码→景别/运镜→主体动作→卖点表达→场景→光线→质感→声音→产品一致性→物理约束),产品图优先锁产品外观,分镜图锁镜头/构图/节奏。字幕按运行参数、禁画面文字、禁引用生成视频。
 5. **出片** —
    - 九宫格多帧(默认):`generateSeedanceVideo({ prompt, referenceImages:[产品图URL, 分镜图URL…], aspectRatio:<运行参数比例>, duration, generateAudio })`。
    - 单主图/1080p:`generateKlingVideo({ prompt, imageUrl:<最强 Hook 帧或产品图 URL>, duration, generateAudio })`,提示词按 `references/kling-prompt.md`。
-6. **取结果** — 超时拿 `taskToken` → `getSeedanceVideoResult` 或 `getKlingVideoResult`(按用的引擎)轮询 → 视频 URL markdown 发给用户。
+6. **取结果** — 超时拿 `taskToken` → `getSeedanceVideoResult` 或 `getKlingVideoResult`(按用的引擎)轮询同一个任务,不得再次调用生成工具。成功后把视频作为**待人工验收预览**返回,要求核对商品身份、颜色、结构、Logo/文字、数量、配件、人物接触、物理连续性和卖点真实性;不得声称已自动验证商品保真。
 
 ## 产品保真(P0 硬门 · 摘要)
 - 产品外观**唯一以产品图为准**:品类、颜色、结构、材质,logo/文字/图案的位置/大小/方向/在哪一面,都要和产品图一致。
@@ -75,10 +76,11 @@ description: 在 X-Border chat 里生成高转化抖音/TikTok 带货短视频�
 
 ## 输出规范
 - 语言/字幕/比例/选角/合规/心智按【本次运行参数】(平台档);用户明说的项覆盖平台默认。
-- 成功:markdown 视频链接(+ 可选分镜图链接),一句话说明用了什么 Hook(及平台/genre)。
+- 成功:markdown 视频链接(+ 可选分镜图链接),一句话说明用了什么 Hook(及平台/genre),并明确标记“待人工验收预览”。
 - 生成中:说明已提交,用 `getSeedanceVideoResult(taskToken)` 查;没好就把 taskToken 给用户稍后再查。
 - 失败:如实说 `errorMsg`,不编造链接。
 - 第一阶段脚本没确认前,不出图、不出片。
+- 同一阶段最多一次定点图片重试;视频任务一旦返回 taskToken,只轮询该任务,禁止重新提交造成重复扣费。
 
 ## 什么时候读 references
 - **第 0 步定平台/genre 前 → `references/platform-profiles.md`**(平台语言/合规/比例/字幕/心智 + 运行参数块)。

@@ -50,11 +50,11 @@ generateSeedanceVideo({
   prompt: <上面的视频提示词>,
   referenceImages: [产品图URL, 分镜图URL, …],   // 产品图在前
   aspectRatio: <运行参数比例>,   // 9:16/1:1/16:9,取【本次运行参数】
-  duration: <运行参数时长>,   // social-ad 9–15s / listing-demo 15–30s,取【本次运行参数】
+  duration: <运行参数单段时长>, // 3–15s；social-ad 9–15s / listing-demo 12–15s
   generateAudio: <audio_mode != silent>
 })
 ```
 超时返回 taskToken → `getSeedanceVideoResult(taskToken)` 轮询到视频 URL。
 
 ## 长视频一致性
-明显长于 17 秒时,多段之间的一致性只靠**产品图 + 分镜图**锁,不要让 Seedance 参考"上一段生成的视频"做连续性。
+需要 15 秒以上时拆成多个独立任务。多段之间的一致性只靠**产品图 + 分镜图**锁,不要让 Seedance 参考"上一段生成的视频"做连续性；每段都要单独人工验收。
